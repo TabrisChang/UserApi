@@ -1,0 +1,42 @@
+spring:
+  output:
+    ansi:
+      enabled: never
+  profiles:
+    include:
+      - property
+
+  # Database info, please replace for your project
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:db;DB_CLOSE_DELAY=-1
+    username: sa
+    password: sa
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: create-drop
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+#  mvc:
+#    static-path-pattern: /static/**
+
+logging:
+  level:
+    org.springframework.boot: info
+
+
+server:
+  port: 8080
+  servlet:
+    context-path: /UserApi
+    encoding:
+      enabled: true
+      charset: UTF-8
+      force: true
+

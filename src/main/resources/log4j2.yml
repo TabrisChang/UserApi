@@ -1,0 +1,75 @@
+Configuration:
+  status: warn
+  properties:
+    property:
+    - name: ContextName
+      value: UserApi
+    - name: LogFolderPath
+      value: AppLog
+    - name: Charset
+      value: UTF-8
+    - name: LogPattern
+      value: '%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level][%t] %c.%L - %msg%n'
+    - name: ColorLogPattern
+      value: '%highlight{%d{yyyy-MM-dd HH:mm:ss.SSS} [%-5level][%t] %c:%L - %msg%n}{FATAL=red
+        blink, ERROR=red, WARN=yellow bold, INFO=cyan, DEBUG=green bold, TRACE=blue
+        bright}'
+  appenders:
+    Console:
+    - name: STDOUT
+      PatternLayout:
+        Pattern: ${LogPattern}
+        Charset: ${Charset}
+    - name: COLOR_STDOUT
+      PatternLayout:
+        Pattern: ${ColorLogPattern}
+        Charset: ${Charset}
+    RollingFile:
+    - name: FILE_OUT
+      fileName: ${LogFolderPath}/${ContextName}.log
+      filePattern: ${LogFolderPath}/$${date:yyyy-MM}/${ContextName}-%d{yyyy-MM-dd}-%i.log.gz
+      PatternLayout:
+        pattern: ${LogPattern}
+        Charset: ${Charset}
+      Policies:
+        SizeBasedTriggeringPolicy:
+          size: 30MB
+      DefaultRollOverStrategy:
+        max: 10
+  Loggers:
+    logger:
+    - name: java.sql.Connection
+      level: debug
+      additivity: false
+      AppenderRef:
+      - ref: STDOUT
+      - ref: FILE_OUT
+    - name: java.sql.Statement
+      level: error
+      additivity: false
+      AppenderRef:
+      - ref: STDOUT
+      - ref: FILE_OUT
+    - name: java.sql.PreparedStatement
+      level: error
+      additivity: false
+      AppenderRef:
+      - ref: STDOUT
+      - ref: FILE_OUT
+    - name: org.hibernate.SQL
+      level: error
+      additivity: false
+      AppenderRef:
+      - ref: STDOUT
+      - ref: FILE_OUT
+    - name: com.hytech.newbie
+      level: trace
+      additivity: false
+      AppenderRef:
+      - ref: COLOR_STDOUT
+      - ref: FILE_OUT
+    Root:
+      level: info
+      AppenderRef:
+      - ref: STDOUT
+      - ref: FILE_OUT
