@@ -4,13 +4,13 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingConstants.ComponentModel;
 import org.mapstruct.Mappings;
+import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.DeleteUserRequestCommand;
+import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.GetUserResponseCommand;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserRequestCommand;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserResponseCommand;
-import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.DeleteUserRequestCommand;
-import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.GetUserRequestCommand;
-import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.GetUserResponseCommand;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.GetUsersRequestCommand;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.UpdateUserRequestCommand;
+import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.GetUserRequestCommand;
 import tw.com.firstbank.fcbcore.fir.service.domain.user.User;
 import tw.com.firstbank.fcbcore.fir.service.domain.user.UserId;
 
