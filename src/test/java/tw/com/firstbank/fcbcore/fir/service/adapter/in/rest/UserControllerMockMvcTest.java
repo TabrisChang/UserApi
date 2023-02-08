@@ -21,7 +21,7 @@ public class UserControllerMockMvcTest {
   private UserControllerMapper mapper;
 
   @Test
-  public void testMapper() {
+  public void testCreateUserRequestToCreateUserRequestCommand() {
     //AAA
     //Arrange
     CreateUserRequest source = Instancio.of(CreateUserRequest.class).create();
