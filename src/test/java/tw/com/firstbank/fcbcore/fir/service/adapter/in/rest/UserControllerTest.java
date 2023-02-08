@@ -4,7 +4,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.instancio.Instancio;
 import org.junit.jupiter.api.Test;
@@ -17,13 +16,11 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.web.reactive.function.BodyInserters;
 import tw.com.firstbank.fcbcore.fir.service.ServiceApplication;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.CreateUserRequest;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.CreateUserResponse;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.mapper.UserControllerMapper;
-import tw.com.firstbank.fcbcore.fir.service.application.in.user.UserService;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.CreateUserRequest;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.CreateUserResponse;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.mapper.UserControllerMapper;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserResponseCommand;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserUseCaseApi;
-import tw.com.firstbank.fcbcore.fir.service.domain.user.type.StatusCode;
 
 @SpringBootTest(classes = ServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class UserControllerTest {

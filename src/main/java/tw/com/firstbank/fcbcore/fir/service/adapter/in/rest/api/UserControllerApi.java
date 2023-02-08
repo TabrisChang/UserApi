@@ -1,4 +1,4 @@
-package tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api;
+package tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api;
 
 import javax.validation.Valid;
 import org.springframework.validation.annotation.Validated;

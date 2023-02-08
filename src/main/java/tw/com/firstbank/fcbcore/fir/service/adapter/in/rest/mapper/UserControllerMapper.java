@@ -1,14 +1,14 @@
-package tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.mapper;
+package tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.mapper;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingConstants.ComponentModel;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.CreateUserRequest;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.CreateUserResponse;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.DeleteUserResponse;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.GetUserResponse;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.GetUsersResponse;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.UpdateUserRequest;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.UpdateUserResponse;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.CreateUserResponse;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.GetUsersResponse;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.UpdateUserResponse;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.CreateUserRequest;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.DeleteUserResponse;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.GetUserResponse;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.UpdateUserRequest;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserRequestCommand;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserResponseCommand;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.DeleteUserRequestCommand;

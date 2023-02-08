@@ -9,8 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import tw.com.firstbank.fcbcore.fir.service.ServiceApplication;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.api.CreateUserRequest;
-import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.adapter.in.rest.mapper.UserControllerMapper;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api.CreateUserRequest;
+import tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.mapper.UserControllerMapper;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserRequestCommand;
 
 @AutoConfigureMockMvc
