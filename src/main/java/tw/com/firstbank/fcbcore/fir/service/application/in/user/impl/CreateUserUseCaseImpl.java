@@ -8,6 +8,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.stereotype.Service;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserRequestCommand;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserResponseCommand;
+import tw.com.firstbank.fcbcore.fir.service.application.in.user.mapper.UserDto;
 import tw.com.firstbank.fcbcore.fir.service.domain.user.type.StatusCode;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.UserService;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.CreateUserUseCaseApi;
@@ -31,8 +32,8 @@ public class CreateUserUseCaseImpl implements CreateUserUseCaseApi {
       String statusCode = getStatusCodeByVerifyUserInfo(requestCommand);
       if (StatusCode.SUCCESS.equals(statusCode)) {
         String no = getUserNo();
-        userService.createUser(mapper.toUserDto(no, requestCommand));
-        resp = mapper.toCreateUserResponseCommand(StatusCode.SUCCESS, no, requestCommand.getBranchCode());
+        UserDto userDto = userService.createUser(mapper.toUserDto(no, requestCommand));
+        resp = mapper.toCreateUserResponseCommand(StatusCode.SUCCESS, userDto.getNo(), requestCommand.getBranchCode());
       } else {
         resp.setStatusCode(statusCode);
       }
