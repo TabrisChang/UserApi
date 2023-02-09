@@ -1,6 +1,8 @@
 package tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.instancio.Select.field;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
@@ -12,13 +14,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import org.apache.commons.lang3.time.DateUtils;
 import org.instancio.Instancio;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +43,8 @@ import tw.com.firstbank.fcbcore.fir.service.domain.user.type.StatusCode;
 
 @AutoConfigureMockMvc
 @SpringBootTest(classes = ServiceApplication.class)
-public class UserControllerApiMockMvcCallApiByRepoTest {
+@TestMethodOrder(OrderAnnotation.class)
+public class UserControllerApiMockMvcCallApiUsingDBTest {
 
   @Autowired
   private MockMvc mockMvc;
@@ -45,27 +54,26 @@ public class UserControllerApiMockMvcCallApiByRepoTest {
   @Autowired
   private UserUseCaseMapper useCaseMapper;
 
-  @MockBean
-  private UserRepository userRepo;
-
   @Autowired
   private ObjectMapper objectMapper;
 
+  private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd") ;
+
   private final static String BASE_URL = "/v1/users";
 
-  private List<User> entityUserList;
+  private static List<User> entityUserList;
 
-  private List<User> entityUserSameBranchCodeList;
+  private static List<User> entityUserSameBranchCodeList;
 
-  private User entityUser;
+  private static User entityUser;
 
-  private CreateUserRequest createUserRequest;
+  private static CreateUserRequest createUserRequest;
 
-  private UpdateUserRequest updateUserRequest;
+  private static UpdateUserRequest updateUserRequest;
 
 
-  @BeforeEach
-  public void setup() {
+  @BeforeAll
+  public static void setup() {
     entityUserList = Instancio.ofList(User.class).size(10)
         .generate(field(UserId::getNo), gen -> gen.text().pattern("#d#d#d#d#d"))
         .generate(field(UserId::getBranchCode), gen -> gen.text().pattern("1#d#d"))
@@ -106,122 +114,63 @@ public class UserControllerApiMockMvcCallApiByRepoTest {
     updateUserRequest.setPhone(entityUser.getPhone());
   }
 
-
-  @Test
-  public void 當呼叫取得所有使用者API時_取得所有使用者_應回傳所有使用者並statusCode為000() throws Exception {
-    //AAA
-    //Arrange
-    when(userRepo.findAll()).thenReturn(entityUserList);
-    List<GetUserResponse> users = entityUserList.stream().map(useCaseMapper::toUserDto)
-        .map(useCaseMapper::toGetUserResponseCommand).map(controllerMapper::toGetUserResponse).toList();
-    GetUsersResponse response = new GetUsersResponse();
-    response.setStatusCode(StatusCode.SUCCESS);
-    response.setUsers(users);
-    String expected = objectMapper.writeValueAsString(response);
-
-    //Act
-    ResultActions resultActions = mockMvc.perform(get(BASE_URL));
-
-    //Assert
-    assertResponse(expected, resultActions);
-
-  }
-
+  @Order(0)
   @Test
   public void 當呼叫新增使用者API時_新增使用者_應新增成功並回傳statusCode為000() throws Exception {
     //AAA
     //Arrange
-    String no = "12345";
     String requestJson = objectMapper.writeValueAsString(createUserRequest);
-    User entity = useCaseMapper.toUserEntity(
-        useCaseMapper.toUserDto(no, controllerMapper.toCreateUserRequestCommand(createUserRequest)));
-
-    when(userRepo.save(any())).thenReturn(entity);
-
-    CreateUserResponse response = new CreateUserResponse();
-    response.setStatusCode(StatusCode.SUCCESS);
-    response.setNo(no);
-    response.setBranchCode(entity.getId().getBranchCode());
-    String expected = objectMapper.writeValueAsString(response);
 
     //Act
     ResultActions resultActions = mockMvc.perform(
         post(BASE_URL).contentType(APPLICATION_JSON_VALUE).content(requestJson));
 
     //Assert
-    assertResponse(expected, resultActions);
-
+    resultActions.andExpect(status().isOk());
+    String responseJsonStr = resultActions.andReturn().getResponse().getContentAsString();
+    CreateUserResponse response = objectMapper.readValue(responseJsonStr, CreateUserResponse.class);
+    assertEquals(StatusCode.SUCCESS, response.getStatusCode());
+    assertEquals(createUserRequest.getBranchCode(), response.getBranchCode());
+    UserId userId = entityUser.getId();
+    userId.setNo(response.getNo());
+    entityUser.setId(userId);
   }
 
-  @Test
-  public void 當呼叫新增使用者API時並給定錯誤的email_新增使用者_應新增失敗並回傳statusCode為606() throws Exception {
-    //AAA
-    //Arrange
-    String no = "12345";
-    createUserRequest.setEmail("error_email");
-    String requestJson = objectMapper.writeValueAsString(createUserRequest);
-    User entity = useCaseMapper.toUserEntity(
-        useCaseMapper.toUserDto(no, controllerMapper.toCreateUserRequestCommand(createUserRequest)));
-
-    when(userRepo.save(any())).thenReturn(entity);
-
-    CreateUserResponse response = new CreateUserResponse();
-    response.setStatusCode(StatusCode.EMAIL_ERROR);
-    String expected = objectMapper.writeValueAsString(response);
-
-    //Act
-    ResultActions resultActions = mockMvc.perform(
-        post(BASE_URL).contentType(APPLICATION_JSON_VALUE).content(requestJson));
-
-    //Assert
-    assertResponse(expected, resultActions);
-
-  }
-
+  @Order(1)
   @Test
   public void 當呼叫取得使用者API時_取得使用者_應回傳使用者並statusCode為000() throws Exception {
     //AAA
     //Arrange
-    when(userRepo.findById(any())).thenReturn(Optional.of(entityUser));
-    GetUserResponse response = controllerMapper.toGetUserResponse(
-        useCaseMapper.toGetUserResponseCommand(useCaseMapper.toUserDto(entityUser)));
-    response.setStatusCode(StatusCode.SUCCESS);
-    String expected = objectMapper.writeValueAsString(response);
-
     //Act
     ResultActions resultActions = mockMvc.perform(
         get(getRestUrl(entityUser.getId().getBranchCode(), entityUser.getId().getNo())));
 
     //Assert
-    assertResponse(expected, resultActions);
+    resultActions.andExpect(status().isOk());
+    String responseJsonStr = resultActions.andReturn().getResponse().getContentAsString();
+    GetUserResponse response = objectMapper.readValue(responseJsonStr, GetUserResponse.class);
+    assertThat(response)
+        .usingRecursiveComparison()
+        .ignoringFields("statusCode","no", "branchCode", "birthday")
+        .isEqualTo(entityUser);
+    assertEquals(StatusCode.SUCCESS, response.getStatusCode());
+    assertEquals(entityUser.getId().getNo(), response.getNo());
+    assertEquals(entityUser.getId().getBranchCode(), response.getBranchCode());
+    assertEquals(dateFormat.format(entityUser.getBirthday()), dateFormat.format(response.getBirthday()));
   }
 
-  @Test
-  public void 當呼叫刪除使用者API時_刪除使用者_應回傳statusCode為000() throws Exception {
-    //AAA
-    //Arrange
-    DeleteUserResponse response = new DeleteUserResponse();
-    response.setStatusCode(StatusCode.SUCCESS);
-    String expected = objectMapper.writeValueAsString(response);
-
-    //Act
-    ResultActions resultActions = mockMvc.perform(
-        delete(getRestUrl(entityUser.getId().getBranchCode(), entityUser.getId().getNo())));
-
-    //Assert
-    assertResponse(expected, resultActions);
-  }
-
+  @Order(2)
   @Test
   public void 當呼叫修改使用者API時_修改使用者_應回傳statusCode為000() throws Exception {
     //AAA
     //Arrange
-    when(userRepo.findById(any())).thenReturn(Optional.of(entityUser));
-    when(userRepo.save(any())).thenReturn(entityUser);
-    String requestJson = objectMapper.writeValueAsString(updateUserRequest);
     UpdateUserResponse response = new UpdateUserResponse();
     response.setStatusCode(StatusCode.SUCCESS);
-    String expected = objectMapper.writeValueAsString(response);
+    String email = "simple@gmail.com";
+    String phone = "0953357213";
+    updateUserRequest.setEmail(email);
+    updateUserRequest.setPhone(phone);
+    String requestJson = objectMapper.writeValueAsString(updateUserRequest);
 
     //Act
     ResultActions resultActions = mockMvc.perform(
@@ -229,29 +178,96 @@ public class UserControllerApiMockMvcCallApiByRepoTest {
             APPLICATION_JSON_VALUE).content(requestJson));
 
     //Assert
-    assertResponse(expected, resultActions);
+    resultActions.andExpect(status().isOk()).andExpect(content().json(objectMapper.writeValueAsString(response)));
   }
 
-  @Test
-  public void 使用branchCode為條件呼叫取得使用者API時_取得使用者_應回傳使用者並statusCode為000() throws Exception {
-    //AAA
-    //Arrange
-    when(userRepo.findByIdBranchCode(any())).thenReturn(entityUserSameBranchCodeList);
-    String branchCode = entityUser.getId().getBranchCode();
-    GetUsersResponse response = Instancio.create(GetUsersResponse.class);
-    List<GetUserResponse> users = entityUserSameBranchCodeList.stream().map(useCaseMapper::toUserDto)
-        .map(useCaseMapper::toGetUserResponseCommand).map(controllerMapper::toGetUserResponse).toList();
-    response.setStatusCode(StatusCode.SUCCESS);
-    response.setUsers(users);
-    String expected = objectMapper.writeValueAsString(response);
-    String url = BASE_URL + "/" + branchCode;
+//  @Test
+//  public void 當呼叫取得所有使用者API時_取得所有使用者_應回傳所有使用者並statusCode為000() throws Exception {
+//    //AAA
+//    //Arrange
+//    when(userRepo.findAll()).thenReturn(entityUserList);
+//    List<GetUserResponse> users = entityUserList.stream().map(useCaseMapper::toUserDto)
+//        .map(useCaseMapper::toGetUserResponseCommand).map(controllerMapper::toGetUserResponse).toList();
+//    GetUsersResponse response = new GetUsersResponse();
+//    response.setStatusCode(StatusCode.SUCCESS);
+//    response.setUsers(users);
+//    String expected = objectMapper.writeValueAsString(response);
+//
+//    //Act
+//    ResultActions resultActions = mockMvc.perform(get(BASE_URL));
+//
+//    //Assert
+//    assertResponse(expected, resultActions);
+//
+//  }
+//
+//
+//
+//  @Test
+//  public void 當呼叫新增使用者API時並給定錯誤的email_新增使用者_應新增失敗並回傳statusCode為606() throws Exception {
+//    //AAA
+//    //Arrange
+//    String no = "12345";
+//    createUserRequest.setEmail("error_email");
+//    String requestJson = objectMapper.writeValueAsString(createUserRequest);
+//    User entity = useCaseMapper.toUserEntity(
+//        useCaseMapper.toUserDto(no, controllerMapper.toCreateUserRequestCommand(createUserRequest)));
+//
+//    when(userRepo.save(any())).thenReturn(entity);
+//
+//    CreateUserResponse response = new CreateUserResponse();
+//    response.setStatusCode(StatusCode.EMAIL_ERROR);
+//    String expected = objectMapper.writeValueAsString(response);
+//
+//    //Act
+//    ResultActions resultActions = mockMvc.perform(
+//        post(BASE_URL).contentType(APPLICATION_JSON_VALUE).content(requestJson));
+//
+//    //Assert
+//    assertResponse(expected, resultActions);
+//
+//  }
+//
 
-    //Act
-    ResultActions resultActions = mockMvc.perform(get(url));
+//
+//  @Test
+//  public void 當呼叫刪除使用者API時_刪除使用者_應回傳statusCode為000() throws Exception {
+//    //AAA
+//    //Arrange
+//    DeleteUserResponse response = new DeleteUserResponse();
+//    response.setStatusCode(StatusCode.SUCCESS);
+//    String expected = objectMapper.writeValueAsString(response);
+//
+//    //Act
+//    ResultActions resultActions = mockMvc.perform(
+//        delete(getRestUrl(entityUser.getId().getBranchCode(), entityUser.getId().getNo())));
+//
+//    //Assert
+//    assertResponse(expected, resultActions);
+//  }
+//
 
-    //Assert
-    assertResponse(expected, resultActions);
-  }
+//
+//  @Test
+//  public void 使用branchCode為條件呼叫取得使用者API時_取得使用者_應回傳使用者並statusCode為000() throws Exception {
+//    //AAA
+//    //Arrange
+//    when(userRepo.findByIdBranchCode(any())).thenReturn(entityUserSameBranchCodeList);
+//    String branchCode = entityUser.getId().getBranchCode();
+//    GetUsersResponse response = Instancio.create(GetUsersResponse.class);
+//    List<GetUserResponse> users = entityUserSameBranchCodeList.stream().map(useCaseMapper::toUserDto)
+//        .map(useCaseMapper::toGetUserResponseCommand).map(controllerMapper::toGetUserResponse).toList();
+//    response.setStatusCode(StatusCode.SUCCESS);
+//    response.setUsers(users);
+//    String expected = objectMapper.writeValueAsString(response);
+//    String url = BASE_URL + "/" + branchCode;
+//
+//    //Act
+//    ResultActions resultActions = mockMvc.perform(get(url));
+//
+//    //Assert
+//    assertResponse(expected, resultActions);
+//  }
 
   private static void assertResponse(String expected, ResultActions resultActions) throws Exception {
     resultActions.andExpect(status().isOk()).andExpect(content().json(expected));

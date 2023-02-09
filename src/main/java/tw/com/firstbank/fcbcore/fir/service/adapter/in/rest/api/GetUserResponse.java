@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import java.util.Date;
+import java.util.TimeZone;
 import lombok.Data;
+import org.apache.commons.lang3.time.TimeZones;
 
 @Data
 public class GetUserResponse {
@@ -17,7 +19,7 @@ public class GetUserResponse {
   private String verificationCode;
   private String firstName;
   private String lastName;
-  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+  @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Taipei")
   private Date birthday;
   private String email;
   private String phone;

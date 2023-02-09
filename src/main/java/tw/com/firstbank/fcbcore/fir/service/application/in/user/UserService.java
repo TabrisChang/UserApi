@@ -20,7 +20,7 @@ public class UserService {
   }
 
   public UserDto getUser(UserDto dto) {
-    return  mapper.toUserDto(
+    return mapper.toUserDto(
         userRepo.findById(mapper.toUserId(dto)).orElse(null)
     );
   }
