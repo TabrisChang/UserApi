@@ -7,6 +7,7 @@ import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.GetUserRespo
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.UserService;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.GetUserRequestCommand;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.GetUserUseCaseApi;
+import tw.com.firstbank.fcbcore.fir.service.application.in.user.mapper.UserDto;
 import tw.com.firstbank.fcbcore.fir.service.application.in.user.mapper.UserUseCaseMapper;
 import tw.com.firstbank.fcbcore.fir.service.domain.user.type.StatusCode;
 
@@ -25,8 +26,13 @@ public class GetUserUseCaseImpl implements GetUserUseCaseApi {
     resp.setStatusCode(StatusCode.UNKNOWN_ERROR);
 
     try {
-      resp = mapper.toGetUserResponseCommand(StatusCode.SUCCESS,
-          userService.getUser(mapper.toUserDto(requestCommand)));
+      UserDto userDto = userService.getUser(mapper.toUserDto(requestCommand));
+      if(userDto != null) {
+        resp = mapper.toGetUserResponseCommand(StatusCode.SUCCESS,
+            userDto);
+      } else {
+        resp.setStatusCode(StatusCode.DATA_NOT_FOUND);
+      }
     } catch (Exception ex) {
       log.error("Get User Error.", ex);
     }

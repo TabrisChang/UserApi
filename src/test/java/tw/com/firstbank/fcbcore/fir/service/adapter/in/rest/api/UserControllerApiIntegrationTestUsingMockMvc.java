@@ -3,7 +3,9 @@ package tw.com.firstbank.fcbcore.fir.service.adapter.in.rest.api;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.instancio.Select.field;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -24,10 +26,6 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.reactive.server.FluxExchangeResult;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.reactive.server.WebTestClient.ResponseSpec;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import tw.com.firstbank.fcbcore.fir.service.ServiceApplication;
@@ -37,17 +35,23 @@ import tw.com.firstbank.fcbcore.fir.service.domain.user.User;
 import tw.com.firstbank.fcbcore.fir.service.domain.user.UserId;
 import tw.com.firstbank.fcbcore.fir.service.domain.user.type.StatusCode;
 
-@SpringBootTest(classes = ServiceApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
+@SpringBootTest(classes = ServiceApplication.class)
 @TestMethodOrder(OrderAnnotation.class)
-public class UserControllerApiCallApiUsingDBTest {
+public class UserControllerApiIntegrationTestUsingMockMvc {
 
   @Autowired
-  private WebTestClient webTestClient;
+  private MockMvc mockMvc;
+  @Autowired
+  private UserControllerMapper controllerMapper;
+
+  @Autowired
+  private UserUseCaseMapper useCaseMapper;
 
   @Autowired
   private ObjectMapper objectMapper;
 
-  private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+  private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd") ;
 
   private final static String BASE_URL = "/v1/users";
 
@@ -112,15 +116,13 @@ public class UserControllerApiCallApiUsingDBTest {
     String requestJson = objectMapper.writeValueAsString(createUserRequest);
 
     //Act
-    ResponseSpec callApiResult =
-        webTestClient.post().uri(BASE_URL)
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestJson).exchange();
+    ResultActions resultActions = mockMvc.perform(
+        post(BASE_URL).contentType(APPLICATION_JSON_VALUE).content(requestJson));
 
     //Assert
-    CreateUserResponse response = callApiResult.expectStatus().isOk()
-        .returnResult(CreateUserResponse.class).getResponseBody().blockFirst();
-
+    resultActions.andExpect(status().isOk());
+    String responseJsonStr = resultActions.andReturn().getResponse().getContentAsString();
+    CreateUserResponse response = objectMapper.readValue(responseJsonStr, CreateUserResponse.class);
     assertEquals(StatusCode.SUCCESS, response.getStatusCode());
     assertEquals(createUserRequest.getBranchCode(), response.getBranchCode());
     UserId userId = entityUser.getId();
@@ -134,17 +136,16 @@ public class UserControllerApiCallApiUsingDBTest {
     //AAA
     //Arrange
     //Act
-    ResponseSpec callApiResult = webTestClient.get()
-        .uri(getRestUrl(entityUser.getId().getBranchCode(), entityUser.getId().getNo())).exchange();
-
+    ResultActions resultActions = mockMvc.perform(
+        get(getRestUrl(entityUser.getId().getBranchCode(), entityUser.getId().getNo())));
 
     //Assert
-    GetUserResponse response = callApiResult.expectStatus().isOk()
-        .returnResult(GetUserResponse.class).getResponseBody().blockFirst();
-
+    resultActions.andExpect(status().isOk());
+    String responseJsonStr = resultActions.andReturn().getResponse().getContentAsString();
+    GetUserResponse response = objectMapper.readValue(responseJsonStr, GetUserResponse.class);
     assertThat(response)
         .usingRecursiveComparison()
-        .ignoringFields("statusCode", "no", "branchCode", "birthday")
+        .ignoringFields("statusCode","no", "branchCode", "birthday")
         .isEqualTo(entityUser);
     assertEquals(StatusCode.SUCCESS, response.getStatusCode());
     assertEquals(entityUser.getId().getNo(), response.getNo());
@@ -166,14 +167,12 @@ public class UserControllerApiCallApiUsingDBTest {
     String requestJson = objectMapper.writeValueAsString(updateUserRequest);
 
     //Act
-    ResponseSpec callApiResult =
-        webTestClient.put().uri(getRestUrl(entityUser.getId().getBranchCode(), entityUser.getId().getNo()))
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue(requestJson).exchange();
+    ResultActions resultActions = mockMvc.perform(
+        put(getRestUrl(entityUser.getId().getBranchCode(), entityUser.getId().getNo())).contentType(
+            APPLICATION_JSON_VALUE).content(requestJson));
 
     //Assert
-    callApiResult.expectStatus().isOk()
-            .expectBody().json(objectMapper.writeValueAsString(response));
+    resultActions.andExpect(status().isOk()).andExpect(content().json(objectMapper.writeValueAsString(response)));
   }
 
 //  @Test

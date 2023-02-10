@@ -35,7 +35,7 @@ import tw.com.firstbank.fcbcore.fir.service.application.in.user.api.UpdateUserUs
 
 @AutoConfigureMockMvc
 @SpringBootTest(classes = ServiceApplication.class)
-public class UserControllerApiMockMvcCallApiTest {
+public class UserControllerApiTestUsingMockMvcAndCallUrlApi {
 
   @Autowired
   private MockMvc mockMvc;

@@ -24,8 +24,12 @@ public class DeleteUserUseCaseImpl implements DeleteUserUseCaseApi {
     resp.setStatusCode(StatusCode.UNKNOWN_ERROR);
 
     try {
-      userService.deleteUser(mapper.toUserDto(requestCommand));
-      resp.setStatusCode(StatusCode.SUCCESS);
+      if(userService.hasUser(mapper.toUserDto(requestCommand))) {
+        userService.deleteUser(mapper.toUserDto(requestCommand));
+        resp.setStatusCode(StatusCode.SUCCESS);
+      } else {
+        resp.setStatusCode(StatusCode.DATA_NOT_FOUND);
+      }
     } catch (Exception ex) {
       log.error("Delete User Error.", ex);
     }
