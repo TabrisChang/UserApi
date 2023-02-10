@@ -296,5 +296,4 @@ public class UserControllerApiIntegrationTestUsingWebTestClient {
     return updateUserRequest;
   }
 
-
 }
